@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Arthur</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0F1115" />
+<link rel="apple-touch-icon" href="icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1115;
+    --surface: #171A21;
+    --surface-raised: #1E222B;
+    --border: #2A2F3A;
+    --text: #EDEEF0;
+    --text-muted: #8A8F98;
+    --accent: #C9A227;
+    --accent-dim: #8A7420;
+    --accent-text: #17140A;
+    --danger: #C0524A;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    overscroll-behavior: none;
+  }
+
+  h1, h2, .display {
+    font-family: 'Newsreader', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  #app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .login-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 32px 28px calc(32px + env(safe-area-inset-bottom));
+    max-width: 420px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .login-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .login-mark span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .login-screen h1 {
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+  .login-screen .sub {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0 0 36px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 15px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: inherit;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    margin-top: 8px;
+  }
+  .btn-primary:active { background: var(--accent-dim); }
+  .btn-primary:disabled { opacity: 0.5; }
+
+  .btn-text {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-family: inherit;
+    padding: 14px 0;
+    width: 100%;
+  }
+
+  .form-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin: -6px 0 14px;
+    min-height: 16px;
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .chat-header .who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-header .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .chat-header h2 {
+    font-size: 18px;
+    margin: 0;
+  }
+  .chat-header button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 6px;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .msg {
+    max-width: 84%;
+    padding: 12px 15px;
+    border-radius: 16px;
+    font-size: 15.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: var(--accent-text);
+    border-bottom-right-radius: 5px;
+  }
+  .msg.assistant {
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 5px;
+  }
+  .msg.pending {
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 5px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 4px;
+    padding: 14px 16px;
+  }
+  .msg.pending span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: pulse 1.1s infinite ease-in-out;
+  }
+  .msg.pending span:nth-child(2) { animation-delay: 0.15s; }
+  .msg.pending span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes pulse {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 32px;
+    color: var(--text-muted);
+  }
+  .empty-state .display {
+    color: var(--text);
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .empty-state p {
+    font-size: 14.5px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .composer {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .composer textarea {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: inherit;
+    resize: none;
+    max-height: 120px;
+    line-height: 1.4;
+  }
+  .composer textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .composer button {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .composer button:disabled {
+    opacity: 0.4;
+  }
+
+  .hidden { display: none !important; }
+
+  .top-error {
+    background: rgba(192, 82, 74, 0.15);
+    border: 1px solid var(--danger);
+    color: #E8A29C;
+    font-size: 13px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="login-screen" class="login-screen">
+    <div class="login-mark"><span></span></div>
+    <h1 class="display">Arthur</h1>
+    <p class="sub">Ton assistant personnel. Connecte-toi pour continuer — il te reconnaîtra sur n'importe quel appareil.</p>
+
+    <div id="login-error" class="top-error hidden"></div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="email" inputmode="email" />
+    </div>
+    <div class="field">
+      <label for="password">Mot de passe</label>
+      <input type="password" id="password" autocomplete="current-password" />
+    </div>
+    <div class="form-error" id="field-error"></div>
+
+    <button class="btn-primary" id="login-btn">Se connecter</button>
+    <button class="btn-text" id="signup-btn">Pas encore de compte ? Créer un compte</button>
+  </div>
+
+  <div id="chat-screen" class="hidden" style="flex:1; display:flex; flex-direction:column; min-height:0;">
+    <div class="chat-header">
+      <div class="who">
+        <div class="dot"></div>
+        <h2>Arthur</h2>
+      </div>
+      <button id="logout-btn">Déconnexion</button>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state" id="empty-state">
+        <div class="display">Dis bonjour à Arthur</div>
+        <p>Il se souvient de vos échanges précédents,<br/>peu importe l'appareil que tu utilises.</p>
+      </div>
+    </div>
+
+    <div class="composer">
+      <textarea id="input" placeholder="Écris à Arthur…" rows="1"></textarea>
+      <button id="send-btn">↑</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = "https://sttmszahjvsgjumnmxvc.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_1A5_EJlxj5wTQCqSTFrVZA_8yFhehZg";
+const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/quick-handler`;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const loginScreen = document.getElementById('login-screen');
+const chatScreen = document.getElementById('chat-screen');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const loginBtn = document.getElementById('login-btn');
+const signupBtn = document.getElementById('signup-btn');
+const loginError = document.getElementById('login-error');
+const fieldError = document.getElementById('field-error');
+const logoutBtn = document.getElementById('logout-btn');
+const messagesEl = document.getElementById('messages');
+const emptyState = document.getElementById('empty-state');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+function showError(msg) {
+  loginError.textContent = msg;
+  loginError.classList.remove('hidden');
+}
+function clearError() {
+  loginError.classList.add('hidden');
+  fieldError.textContent = '';
+}
+
+async function handleLogin() {
+  clearError();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  if (!email || !password) {
+    fieldError.textContent = "Renseigne ton email et ton mot de passe.";
+    return;
+  }
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Connexion…";
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  loginBtn.disabled = false;
+  loginBtn.textContent = "Se connecter";
+  if (error) {
+    showError(error.message);
+    return;
+  }
+  enterChat();
+}
+
+async function handleSignup() {
+  clearError();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+  if (!email || !password) {
+    fieldError.textContent = "Renseigne un email et un mot de passe.";
+    return;
+  }
+  if (password.length < 6) {
+    fieldError.textContent = "Le mot de passe doit faire au moins 6 caractères.";
+    return;
+  }
+  signupBtn.disabled = true;
+  const { error } = await supabase.auth.signUp({ email, password });
+  signupBtn.disabled = false;
+  if (error) {
+    showError(error.message);
+    return;
+  }
+  showError("Compte créé. Si la confirmation par email est activée, vérifie ta boîte mail avant de te connecter.");
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  chatScreen.classList.add('hidden');
+  loginScreen.classList.remove('hidden');
+  messagesEl.innerHTML = '';
+  messagesEl.appendChild(emptyState);
+}
+
+function addMessage(role, content) {
+  emptyState.remove();
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.textContent = content;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+function addPending() {
+  const div = document.createElement('div');
+  div.className = 'msg pending';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  sendBtn.disabled = true;
+
+  addMessage('user', text);
+  const pending = addPending();
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    pending.remove();
+    addMessage('assistant', data.reply || "Je n'ai pas pu répondre, réessaie.");
+  } catch (e) {
+    pending.remove();
+    addMessage('assistant', "Connexion impossible. Vérifie ta connexion internet et réessaie.");
+  }
+  sendBtn.disabled = false;
+}
+
+function enterChat() {
+  loginScreen.classList.add('hidden');
+  chatScreen.classList.remove('hidden');
+  loadHistory();
+}
+
+async function loadHistory() {
+  const { data, error } = await supabase
+    .from('arthur_messages')
+    .select('role, content, created_at')
+    .order('created_at', { ascending: true })
+    .limit(50);
+  if (error || !data || data.length === 0) return;
+  emptyState.remove();
+  data.forEach(m => addMessage(m.role, m.content));
+}
+
+loginBtn.addEventListener('click', handleLogin);
+signupBtn.addEventListener('click', handleSignup);
+logoutBtn.addEventListener('click', handleLogout);
+sendBtn.addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) enterChat();
+})();
+</script>
+</body>
+  </html>
